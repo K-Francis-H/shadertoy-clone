@@ -1,16 +1,16 @@
 const VSHADER = `
-	attribute vec4 a_Position;
-	uniform vec2 u_Resolution;
-	uniform float u_Time;
-	uniform vec3 u_Color;
-	varying vec2 v_Resolution;
-	varying float v_Time;
-	varying vec3 v_Color;
-	void main() {
-		v_Resolution = u_Resolution;
-		v_Time = u_Time;
-		gl_Position = a_Position;
-	}
+attribute vec4 a_Position;
+uniform vec2 u_Resolution;
+uniform float u_Time;
+uniform vec3 u_Color;
+varying vec2 v_Resolution;
+varying float v_Time;
+varying vec3 v_Color;
+void main() {
+	v_Resolution = u_Resolution;
+	v_Time = u_Time;
+	gl_Position = a_Position;
+}
 `;
 
 const FSHADER = `
@@ -62,48 +62,48 @@ void main() {
 }
 `;
 
-const SHADER = `vec3 palette(float t) {
-    vec3 a = vec3(0.5,0.5,0.5);
-    vec3 b = vec3(0.5,0.5,0.5);
-    vec3 c = vec3(1.0,1.0,1.0);
-    vec3 d = vec3(0.263,0.416,0.557);
-    
-    return a + b*cos(6.28318*(c*t*d) );
+const SHADER = `
+vec3 palette(float t) {
+	vec3 a = vec3(0.5,0.5,0.5);
+	vec3 b = vec3(0.5,0.5,0.5);
+	vec3 c = vec3(1.0,1.0,1.0);
+	vec3 d = vec3(0.263,0.416,0.557);
+
+	return a + b*cos(6.28318*(c*t*d) );
 }
 
-void mainImage( out vec4 fragColor, in vec2 fragCoord )
-{
-    // Normalized pixel coordinates (from 0 to 1)
-    vec2 uv = 2.0*fragCoord/iResolution.xy - 1.0;
-    uv.x *= iResolution.x / iResolution.y; 
-    
-    vec3 finalCol = vec3(0.0);
-    
-    vec2 uv0 = uv;
-    
-    
+void mainImage( out vec4 fragColor, in vec2 fragCoord ){
+	// Normalized pixel coordinates (from 0 to 1)
+	vec2 uv = 2.0*fragCoord/iResolution.xy - 1.0;
+	uv.x *= iResolution.x / iResolution.y; 
 
-    for(float i=0.0; i < 3.0; i++){
-        uv = fract(uv * 2.7) - 0.5;
-    
-        float d = length(uv) * exp(-length(uv0));
-    
-        vec3 col = palette(length(uv0) + i*.4 + iTime*.4);
+	vec3 finalCol = vec3(0.0);
 
-        d = sin(d*8.0 + iTime)/8.0;
-        d = abs(d);
+	vec2 uv0 = uv;
 
-        //d = smoothstep(0.0,0.1,d);
-        d = pow(0.02 / d, 1.2);
 
-        finalCol += col * d;
-    }
-    
 
-    
+	for(float i=0.0; i < 3.0; i++){
+		uv = fract(uv * 2.7) - 0.5;
 
-    // Output to screen
-    fragColor = vec4(finalCol,1.0);
+		float d = length(uv) * exp(-length(uv0));
+
+		vec3 col = palette(length(uv0) + i*.4 + iTime*.4);
+
+		d = sin(d*8.0 + iTime)/8.0;
+		d = abs(d);
+
+		//d = smoothstep(0.0,0.1,d);
+		d = pow(0.02 / d, 1.2);
+
+		finalCol += col * d;
+	}
+
+
+
+
+	// Output to screen
+	fragColor = vec4(finalCol,1.0);
 }`;
 
 //a quad to cover the entire view
