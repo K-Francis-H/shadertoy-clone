@@ -14,52 +14,52 @@ const VSHADER = `
 `;
 
 const FSHADER = `
-	#ifdef GL_ES
-	precision mediump float;
-	#endif
-	varying vec2 v_Resolution;
-	varying float v_Time;
-	varying vec3 v_Color;
+#ifdef GL_ES
+precision mediump float;
+#endif
+varying vec2 v_Resolution;
+varying float v_Time;
+varying vec3 v_Color;
 
-	vec3 palette(float t) {
-	    vec3 a = vec3(0.5,0.5,0.5);
-	    vec3 b = vec3(0.5,0.5,0.5);
-	    vec3 c = vec3(1.0,1.0,1.0);
-	    vec3 d = vec3(0.263,0.416,0.557);
-	    
-	    return a + b*cos(6.28318*(c*t*d) );
+vec3 palette(float t) {
+    vec3 a = vec3(0.5,0.5,0.5);
+    vec3 b = vec3(0.5,0.5,0.5);
+    vec3 c = vec3(1.0,1.0,1.0);
+    vec3 d = vec3(0.263,0.416,0.557);
+    
+    return a + b*cos(6.28318*(c*t*d) );
+}
+
+vec4 mainImage(vec2 fragCoord){
+	vec2 uv = 2.0*fragCoord/v_Resolution.xy - 1.0;
+	uv.x *= v_Resolution.x / v_Resolution.y; 
+
+	vec3 finalCol = vec3(0.0);
+	vec2 uv0 = uv;
+
+	for(float i=0.0; i < 3.0; i++){
+		uv = fract(uv * 1.6) - 0.5;
+
+		float d = length(uv) * exp(-length(uv0));
+
+		vec3 col = palette(length(uv0) + i*.4 + v_Time*.4);
+
+		d = sin(d*8.0 + v_Time)/8.0;
+		d = abs(d);
+
+		//d = smoothstep(0.0,0.1,d);
+		d = pow(0.02 / d, 1.2);
+
+		finalCol += col * d;
 	}
 
-	vec4 mainImage(vec2 fragCoord){
-		vec2 uv = 2.0*fragCoord/v_Resolution.xy - 1.0;
-		uv.x *= v_Resolution.x / v_Resolution.y; 
+	// Output to screen
+	return vec4(finalCol,1.0);
+} 
 
-		vec3 finalCol = vec3(0.0);
-		vec2 uv0 = uv;
-
-		for(float i=0.0; i < 3.0; i++){
-			uv = fract(uv * 1.6) - 0.5;
-
-			float d = length(uv) * exp(-length(uv0));
-
-			vec3 col = palette(length(uv0) + i*.4 + v_Time*.4);
-
-			d = sin(d*8.0 + v_Time)/8.0;
-			d = abs(d);
-
-			//d = smoothstep(0.0,0.1,d);
-			d = pow(0.02 / d, 1.2);
-
-			finalCol += col * d;
-		}
-
-		// Output to screen
-		return vec4(finalCol,1.0);
-	} 
-
-	void main() {
-		gl_FragColor = mainImage(gl_FragCoord.xy);
-	}
+void main() {
+	gl_FragColor = mainImage(gl_FragCoord.xy);
+}
 `;
 
 const SHADER = `vec3 palette(float t) {
